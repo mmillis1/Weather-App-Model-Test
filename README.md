@@ -1,6 +1,6 @@
 # Weather App
 
-## I want to build a beatiful, elegant, web application using laravel. The app is intentionally simple, but looks premium.
+## I want to build a beautiful, elegant, web application using laravel. The app is intentionally simple, but looks premium.
 
 The home page has a single large, beautiful button: “Get my weather”
 
