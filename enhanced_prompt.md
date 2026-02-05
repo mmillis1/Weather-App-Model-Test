@@ -2,7 +2,7 @@
 
 ## I want to build a beautiful, elegant, web application using laravel. The app is intentionally simple, but looks amazing. Make sure to use the brainstorming skill, frontend-design skill and ask me lots of questions.
 
-### This weather app, needs to be gorgeous, breathtaking, and have ALL the visuals, animations, colors, and some basic verbiage, telling users why they need to use OUR weather app. Don't be too verbose, but be witty. Again, I want this website to WOW me in terms of its visuals and css. Don't forget mobile styling!! I want a button that can toggle between light mode and dark mode. Light mode should be default, and can change to dark mode. Make sure to consider color theme and choices to ensure light and dark mode look gorgeous and works well.
+### This weather app, needs to be gorgeous, breathtaking, and have ALL the visuals, animations, colors, and some basic verbiage, telling users why they need to use OUR weather app. Don't be too verbose, but be witty. Again, I want this website to WOW me in terms of its visuals and css. Don't forget mobile styling!! I want a button that can toggle between light mode and dark mode. Light mode should be default, and can change to dark mode. Make sure to consider color theme and choices to ensure light and dark mode look gorgeous and no accessibility issues.
 
 The only page is the home page. It has a single large, beautiful button: “Get my weather”
 
@@ -42,6 +42,7 @@ The only page is the home page. It has a single large, beautiful button: “Get 
 
 - Write quality tests for this application
 - I want a high level of test coverage
+- Do NOT write browser tests. We do not have the proper packages installed. Stick to default, laravel unit and feature tests.
 
 You will grab weather data via the API provided by https://openweathermap.org/api
 
