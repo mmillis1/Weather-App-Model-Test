@@ -4,23 +4,19 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GetWeatherRequest extends FormRequest
-{
-    public function authorize(): bool
-    {
+class GetWeatherRequest extends FormRequest {
+    public function authorize(): bool {
         return true;
     }
 
-    public function rules(): array
-    {
+    public function rules(): array {
         return [
             'lat' => ['required', 'numeric', 'between:-90,90'],
             'lon' => ['required', 'numeric', 'between:-180,180'],
         ];
     }
 
-    public function messages(): array
-    {
+    public function messages(): array {
         return [
             'lat.required' => 'Latitude is required to fetch your weather.',
             'lat.numeric' => 'Latitude must be a valid number.',

@@ -8,13 +8,11 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 
-class GetCurrentWeather
-{
-    public function execute(float $latitude, float $longitude): array
-    {
+class GetCurrentWeather {
+    public function execute(float $latitude, float $longitude): array {
         $apiKey = Config::get('services.openweather.key');
 
-        if (! is_string($apiKey) || $apiKey === '') {
+        if (!is_string($apiKey) || $apiKey === '') {
             return $this->errorResult('Weather service is not configured.', 500);
         }
 
@@ -29,13 +27,13 @@ class GetCurrentWeather
                 'units' => 'imperial',
             ]);
 
-            if (! $response->successful()) {
+            if (!$response->successful()) {
                 return $this->errorFromResponse($response);
             }
 
             $payload = $response->json();
 
-            if (! is_array($payload)) {
+            if (!is_array($payload)) {
                 return $this->errorResult('Weather service returned an unexpected response.', 502);
             }
 
@@ -43,20 +41,18 @@ class GetCurrentWeather
         });
     }
 
-    private function cacheKey(float $latitude, float $longitude): string
-    {
+    private function cacheKey(float $latitude, float $longitude): string {
         $lat = number_format($latitude, 2, '.', '');
         $lon = number_format($longitude, 2, '.', '');
 
         return sprintf('weather:lat:%s:lon:%s:imperial', $lat, $lon);
     }
 
-    private function normalizeResponse(array $payload): array
-    {
+    private function normalizeResponse(array $payload): array {
         $temperature = $payload['main']['temp'] ?? null;
         $feelsLike = $payload['main']['feels_like'] ?? null;
 
-        if (! is_numeric($temperature) || ! is_numeric($feelsLike)) {
+        if (!is_numeric($temperature) || !is_numeric($feelsLike)) {
             return $this->errorResult('Weather service returned incomplete data.', 502);
         }
 
@@ -86,8 +82,7 @@ class GetCurrentWeather
         ];
     }
 
-    private function errorFromResponse(Response $response): array
-    {
+    private function errorFromResponse(Response $response): array {
         if ($response->tooManyRequests()) {
             return $this->errorResult('Weather service is temporarily rate limited. Please try again soon.', 429);
         }
@@ -103,8 +98,7 @@ class GetCurrentWeather
         return $this->errorResult('Weather service returned an unexpected response.', 502);
     }
 
-    private function errorResult(string $message, int $status): array
-    {
+    private function errorResult(string $message, int $status): array {
         return [
             'error' => [
                 'message' => $message,

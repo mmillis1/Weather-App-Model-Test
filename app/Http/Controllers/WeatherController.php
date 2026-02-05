@@ -7,10 +7,8 @@ use App\Http\Requests\GetWeatherRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Response;
 
-class WeatherController extends Controller
-{
-    public function __invoke(GetWeatherRequest $request, GetCurrentWeather $getCurrentWeather): JsonResponse
-    {
+class WeatherController extends Controller {
+    public function __invoke(GetWeatherRequest $request, GetCurrentWeather $getCurrentWeather): JsonResponse {
         $validated = $request->validated();
         $latitude = (float) $validated['lat'];
         $longitude = (float) $validated['lon'];
