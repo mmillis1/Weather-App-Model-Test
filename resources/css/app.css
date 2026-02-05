@@ -1,11 +1,72 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Plus Jakarta Sans', 'Avenir Next', 'Segoe UI', sans-serif;
+    --font-serif: 'Playfair Display', Georgia, serif;
+
+    --color-tempest-sun-50: #fff9f3;
+    --color-tempest-sun-100: #ffe9d8;
+    --color-tempest-sun-300: #ffc48d;
+    --color-tempest-sky-200: #d4eeff;
+    --color-tempest-sky-500: #2a8ee8;
+    --color-tempest-dusk-700: #223258;
+    --color-tempest-dusk-900: #111c33;
+    --color-tempest-night-950: #081023;
+
+    --animate-tempest-float: tempest-float 9s ease-in-out infinite;
+    --animate-tempest-glow: tempest-glow 12s linear infinite;
+}
+
+@keyframes tempest-float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+@keyframes tempest-glow {
+    0% {
+        transform: translate3d(-4%, 0, 0) scale(1);
+    }
+
+    50% {
+        transform: translate3d(4%, -3%, 0) scale(1.04);
+    }
+
+    100% {
+        transform: translate3d(-4%, 0, 0) scale(1);
+    }
+}
+
+@layer components {
+    .tempest-shell {
+        @apply relative min-h-screen overflow-hidden bg-linear-to-br from-tempest-sun-50 via-tempest-sky-200 to-tempest-sun-100 text-slate-900 transition-colors duration-500 dark:from-tempest-night-950 dark:via-tempest-dusk-900 dark:to-tempest-dusk-700 dark:text-slate-100;
+    }
+
+    .tempest-ambient {
+        @apply pointer-events-none absolute -z-0 size-[30rem] rounded-full bg-linear-to-br from-orange-300/60 to-cyan-300/30 blur-3xl animate-tempest-glow dark:from-cyan-400/30 dark:to-indigo-400/30;
+    }
+
+    .tempest-glass {
+        @apply rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_30px_80px_-45px_rgba(17,24,39,0.45)] backdrop-blur-xl dark:border-white/15 dark:bg-white/10;
+    }
+
+    .tempest-button {
+        @apply inline-flex items-center justify-center rounded-full border border-white/70 bg-linear-to-br from-tempest-sky-500 via-sky-500 to-cyan-400 px-8 py-5 text-lg font-semibold tracking-wide text-white shadow-[0_20px_45px_-20px_rgba(14,116,205,0.75)] transition duration-300 hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-600 active:translate-y-0 dark:border-white/20;
+    }
+
+    .tempest-metric {
+        @apply rounded-2xl border border-slate-900/10 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5;
+    }
 }
