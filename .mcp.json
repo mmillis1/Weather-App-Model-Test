@@ -1,10 +1,21 @@
 {
     "mcpServers": {
-        "laravel-boost": {
-            "command": "php",
+        "laravel-boost-host": {
+            "type": "stdio",
+            "command": "ddev",
+            "args": ["exec", "php", "artisan", "boost:mcp"]
+        },
+        "daisyui": {
+            "type": "sse",
+            "url": "https://gitmcp.io/saadeghi/daisyui"
+        },
+        "chrome-devtools": {
+            "type": "stdio",
+            "command": "npx",
             "args": [
-                "artisan",
-                "boost:mcp"
+                "chrome-devtools-mcp@latest",
+                "--executablePath",
+                "/usr/bin/chromium"
             ]
         }
     }

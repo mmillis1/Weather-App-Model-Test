@@ -1,4 +1,272 @@
 <laravel-boost-guidelines>
+=== .ai/ddev rules ===
+
+## DDEV Local Development Environment
+
+### Overview
+
+- This project uses DDEV for local development.
+- The application is accessible at `https://<project-name>.ddev.site` when running (use `ddev describe` to see the exact URL).
+- Use `ddev describe` to see project URLs, database credentials, and container status.
+
+### Command Execution Methods
+
+**Use command shortcuts when possible:**
+
+- `ddev artisan <command>` - For all Laravel Artisan commands
+- `ddev composer <command>` - For all Composer commands
+- `ddev npm <command>` - For all NPM commands
+- `ddev mysql` - For interactive MySQL access
+
+**Use `ddev exec <command>` when:**
+
+- Running a single command not covered by shortcuts
+- Examples: `ddev exec vendor/bin/pint`, `ddev exec php -v`, `ddev exec ls -la storage/logs`
+- Commands execute in the container's docroot (`/var/www/html`) using Bash
+
+### MCP Tools
+
+- Laravel Boost MCP tools (tinker, database-query, list-artisan-commands, etc.) automatically run inside the DDEV
+  container via the configured MCP bridge.
+- No `ddev` prefix is needed when using MCP tools - the connection is already configured.
+
+### File Paths: Container vs Host
+
+- Files in your project directory are automatically synced to `/var/www/html` in the container.
+- When inside the container (via `ddev ssh`), you're already at the project root.
+- **Do not use absolute host paths in DDEV commands** - they won't exist in the container.
+- Read Laravel logs using the Read tool at `storage/logs/laravel.log` (relative to project root).
+
+### Laravel-Specific Commands
+
+**Running tests:**
+
+- All tests: `ddev artisan test`
+- Specific file: `ddev artisan test tests/Feature/ExampleTest.php`
+- Filter: `ddev artisan test --filter=testName`
+
+### Queue Workers & Scheduled Tasks
+
+### Frontend Development
+
+- Developer is running ddev npm run dev. No need to rebuild or manually run vite.
+
+**Running Vite:**
+
+- Development: `ddev npm run dev` (starts Vite dev server with HMR)
+- Build: `ddev npm run build`
+- If assets don't update, check if Vite dev server is running
+
+**Vite configuration:**
+
+- Configured to work seamlessly with DDEV
+- Hot module replacement (HMR) works across host/container boundary
+
+### Debugging & Troubleshooting
+
+**Check container info:**
+
+- `ddev describe` - Project info, URLs, credentials
+- `ddev exec env` - Environment variables
+
+### Common DDEV Gotchas
+
+**Always prefix PHP/Laravel commands with `ddev`:**
+
+- ❌ `php artisan migrate` (fails - runs on host, no PHP)
+- ✅ `ddev artisan migrate` (works - runs in container)
+- ❌ `vendor/bin/pint` (fails - no vendor directory on host)
+- ✅ `ddev exec vendor/bin/pint` (works - runs in container)
+- ❌ `composer install` (fails - runs on host)
+- ✅ `ddev composer install` (works - runs in container)
+
+**Port conflicts:**
+
+- DDEV uses ports 80 and 443 by default
+- If conflicts occur, check for other Docker environments or local servers
+
+## Laravel Pint Code Formatter
+
+- You must run `ddev exec vendor/bin/pint --dirty` before finalizing changes to ensure your code matches the project's
+  expected style.
+- Do not run `vendor/bin/pint --test`, simply run `ddev exec vendor/bin/pint` to fix any formatting issues.
+
+## User Login
+
+If you ever need to login to the application to view a page in chrome-dev-tools or something. Please use the credentials in Database\Seeders\DevSeeder.php (email: mmillis1@gmail.com, password: password).
+
+=== .ai/laravel rules ===
+
+# Laravel Code Preferences
+
+## Import Classes Instead of Using Long FQCNs Inline
+
+Prefer importing classes at the top of the file with use rather than referencing long fully-qualified class names inline.
+
+Why: Improves readability, keeps code concise, and still preserves refactor safety and LSP support.
+
+```
+// ✅ Good
+use Illuminate\Bus\Batch;
+
+$this->assertInstanceOf(Batch::class, $batch);
+
+// ❌ Avoid
+$this->assertInstanceOf(\Illuminate\Bus\Batch::class, $batch);
+```
+
+## Class Names Over Strings (Everywhere)
+
+**Always prefer class references (::class) over string literals anywhere they are supported.**
+
+Why: Class references are refactor-safe, discoverable by IDE/LSP tooling, and reduce runtime errors caused by typos.
+
+```
+// ✅ Good
+use App\Console\Commands\SyncUsers;
+use App\Models\User;
+
+Schedule::command(SyncUsers::class)->daily();
+artisan(SyncUsers::class);
+
+$this->assertInstanceOf(User::class, $user);
+
+// ❌ Avoid
+Schedule::command('users:sync')->daily();
+artisan('users:sync');
+
+$this->assertInstanceOf('App\Models\User', $user);
+```
+
+This applies to:
+
+- Console commands
+- Jobs
+- Events / listeners
+- Policies
+- Model references
+- Tests
+- Container bindings
+- Anywhere Laravel accepts a class reference
+
+## Facades Over Helpers
+
+Use static facades with leading backslash for better IDE/LSP support (Neovim + Intelephense).
+
+```php
+// ✅ Good
+\Auth::check()
+\Auth::user()
+\Gate::allows('premium')
+\Cache::get('key')
+
+// ❌ Avoid
+auth()->check()
+auth()->user()
+
+{{-- ✅ Blade --}}
+@if(\Auth::check())
+{{ \Auth::user()->name }}
+@endif
+```
+
+Why: Class names are refactor-safe. `\Auth::` provides better LSP autocomplete and jump-to-definition in Neovim.
+
+### Practical Examples
+
+- Prefer `$request->user()` when `Request $request` is injected
+- Use `\Auth::user()` as fallback when Request unavailable
+- Never use `auth()->user()` global helper
+
+If you are unable to use injected dependencies, please follow the rules regarding PHPDocs.
+
+Use `@var` PHPDoc annotations when IDE or static analysis (Larastan) can't infer types, particularly for user variables or when working with mixed/uncertain types.
+
+## Single Action Classes
+
+Prefer single action classes over business logic methods on models. Encapsulate business logic in dedicated action classes.
+
+### Structure Requirements
+
+- Exactly ONE public `execute()` method - this is the only external interface
+- Can have multiple private/protected methods for internal implementation
+- Private methods must be **internal to the class** (never called externally)
+- All action classes must be **instances**, never static methods
+- Names must **ALWAYS start with a verb** (e.g., `Get`, `Calculate`, `Process`)
+
+### Placement and Organization
+
+- Store in `app/Actions/` directory
+- Create subdirectories inside `Actions/` for organizational purposes (e.g., `app/Actions/Dashboard/`, `app/Actions/Timeslip/`)
+- Organize by domain or feature area
+
+### Usage Patterns
+
+```php
+// ✅ Preferred - Dependency Injection
+public function __invoke(
+    GetPrimaryVehicle $getPrimaryVehicle,
+    GetVehicleStats $getVehicleStats
+) {
+    $primaryVehicle = $getPrimaryVehicle->execute($user);
+    $stats = $getVehicleStats->execute($vehicle);
+}
+
+// ✅ Acceptable - Manual Instantiation (when DI not available)
+$action = new GetPrimaryVehicle();
+$result = $action->execute($user);
+```
+
+### Naming Conventions
+
+Use descriptive names following Verb-Noun or Verb-Adjective patterns:
+
+- `GetPrimaryVehicle` - Retrieve specific data
+- `GetPerformanceTrends` - Compute trends from data
+- `GetVehicleStats` - Calculate statistics
+- `GetDefaultTimeslipName` - Generate formatted output
+
+### Benefits
+
+- Models stay thin (data access and relationships only)
+- Logic is testable in isolation
+- Single responsibility principle per class
+- Clear dependency injection
+- Easy to find and maintain business logic
+
+=== .ai/pest rules ===
+
+# Pest Testing Conventions
+
+  ## Prefer Global Functions Over $this Methods
+
+  When writing Pest tests, prefer using Pest's global helper functions with explicit imports instead of `$this->` methods. This aligns with Pest's functional style and improves code readability.
+
+  **Good:**
+  ```php
+  use function Pest\Laravel\assertDatabaseHas;
+
+  test('creates user', function () {
+      assertDatabaseHas('users', ['email' => 'test@example.com']);
+  });
+
+  Avoid:
+  test('creates user', function () {
+      $this->assertDatabaseHas('users', ['email' => 'test@example.com']);
+  });
+
+  Single-Line Imports Only
+
+  Always use single-line imports for functions. Never use grouped imports.
+
+  Good:
+  use function Pest\Laravel\assertDatabaseHas;
+  use function Pest\Laravel\assertDatabaseMissing;
+  use function Pest\Laravel\actingAs;
+
+  Never:
+  use function Pest\Laravel\{assertDatabaseHas, assertDatabaseMissing, actingAs};
+
 === foundation rules ===
 
 # Laravel Boost Guidelines
@@ -9,7 +277,7 @@ The Laravel Boost guidelines are specifically curated by Laravel maintainers for
 
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
-- php - 8.5.1
+- php - 8.4.14
 - laravel/framework (LARAVEL) - v12
 - laravel/prompts (PROMPTS) - v0
 - laravel/mcp (MCP) - v0
@@ -17,12 +285,14 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - laravel/sail (SAIL) - v1
 - pestphp/pest (PEST) - v4
 - phpunit/phpunit (PHPUNIT) - v12
+- tailwindcss (TAILWINDCSS) - v4
 
 ## Skills Activation
 
 This project has domain-specific skills available. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
 
 - `pest-testing` — Tests applications using the Pest 4 PHP framework. Activates when writing tests, creating unit or feature tests, adding assertions, testing Livewire components, browser testing, debugging test failures, working with datasets or mocking; or when the user mentions test, spec, TDD, expects, assertion, coverage, or needs to verify functionality works.
+- `tailwindcss-development` — Styles applications using Tailwind CSS v4 utilities. Activates when adding styles, restyling components, working with gradients, spacing, layout, flex, grid, responsive design, dark mode, colors, typography, or borders; or when the user mentions CSS, styling, classes, Tailwind, restyle, hero section, cards, buttons, or any visual/UI changes.
 
 ## Conventions
 
@@ -222,4 +492,12 @@ protected function isAccessible(User $user, ?string $path = null): bool
 - Do NOT delete tests without approval.
 - CRITICAL: ALWAYS use `search-docs` tool for version-specific Pest documentation and updated code examples.
 - IMPORTANT: Activate `pest-testing` every time you're working with a Pest or testing-related task.
+
+=== tailwindcss/core rules ===
+
+# Tailwind CSS
+
+- Always use existing Tailwind conventions; check project patterns before adding new ones.
+- IMPORTANT: Always use `search-docs` tool for version-specific Tailwind CSS documentation and updated code examples. Never rely on training data.
+- IMPORTANT: Activate `tailwindcss-development` every time you're working with a Tailwind CSS or styling-related task.
 </laravel-boost-guidelines>
