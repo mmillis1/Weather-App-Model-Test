@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'openweathermap' => [
+        'key' => env('OPENWEATHER_API_KEY'),
+        'url' => env('OPENWEATHER_URL', 'https://api.openweathermap.org/data/2.5'),
+    ],
+
 ];
